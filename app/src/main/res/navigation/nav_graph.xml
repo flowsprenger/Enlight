@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@id/fragment_nav_host">
+    <fragment
+        android:id="@+id/fragment_nav_host"
+        android:name="lf.wo.enlight.ui.main.MainFragment"
+        android:label="@string/title_of_fragment" >
+    <action
+        android:id="@+id/action_MainFragment_to_BlankFragment"
+        app:destination="@id/blankFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/blankFragment"
+        android:name="lf.wo.enlight.ui.main.BlankFragment"
+        android:label="fragment_blank_fragment"
+        tools:layout="@layout/blank_fragment" />
+</navigation>

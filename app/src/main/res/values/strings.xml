@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">EnLight</string>
+    <string name="title_of_fragment">Hello World</string>
+</resources>
