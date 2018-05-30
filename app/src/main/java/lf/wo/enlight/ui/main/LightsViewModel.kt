@@ -10,8 +10,9 @@ import io.reactivex.schedulers.Schedulers
 import wo.lf.lifx.api.*
 import wo.lf.lifx.extensions.fireAndForget
 import wo.lf.lifx.net.UdpTransport
+import javax.inject.Inject
 
-class LightsViewModel : ViewModel() {
+class LightsViewModel  @Inject constructor(): ViewModel() {
 
     private val mutableLights = MutableLiveData<List<Light>>().apply { value = listOf() }
     val lights: LiveData<List<Light>> = mutableLights

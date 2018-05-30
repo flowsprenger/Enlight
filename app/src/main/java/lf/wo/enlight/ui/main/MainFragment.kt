@@ -1,6 +1,7 @@
 package lf.wo.enlight.ui.main
 
 import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -16,13 +17,18 @@ import kotlinx.android.synthetic.main.main_fragment.*
 import lf.wo.enlight.R
 import lf.wo.enlight.R.id.butt
 import lf.wo.enlight.R.id.imageButton
+import lf.wo.enlight.di.Injectable
 import wo.lf.lifx.api.Light
+import javax.inject.Inject
 
-class MainFragment : Fragment() {
+class MainFragment : Fragment(), Injectable {
 
     companion object {
         fun newInstance() = MainFragment()
     }
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
 
     private lateinit var viewModel: MainViewModel
 
@@ -35,9 +41,13 @@ class MainFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
 
-        lightsViewModel = ViewModelProviders.of(activity!!).get(LightsViewModel::class.java)
+        viewModel = ViewModelProviders.of(this, viewModelFactory)
+                .get(MainViewModel::class.java)
+
+        lightsViewModel = ViewModelProviders.of(this, viewModelFactory)
+                .get(LightsViewModel::class.java)
+
         lightsViewModel.lights.observe(this, Observer<List<Light>> { t ->
             lightsUpdated(t ?: listOf())
         })
