@@ -11,20 +11,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
-import android.widget.ImageView
 import androidx.navigation.findNavController
 import kotlinx.android.synthetic.main.main_fragment.*
 import lf.wo.enlight.R
-import lf.wo.enlight.R.id.butt
 import lf.wo.enlight.R.id.imageButton
 import lf.wo.enlight.di.Injectable
 import wo.lf.lifx.api.Light
 import javax.inject.Inject
 
-class MainFragment : Fragment(), Injectable {
+class LightsListFragment : Fragment(), Injectable {
 
     companion object {
-        fun newInstance() = MainFragment()
+        fun newInstance() = LightsListFragment()
     }
 
     @Inject
@@ -45,7 +43,7 @@ class MainFragment : Fragment(), Injectable {
         viewModel = ViewModelProviders.of(this, viewModelFactory)
                 .get(MainViewModel::class.java)
 
-        lightsViewModel = ViewModelProviders.of(this, viewModelFactory)
+        lightsViewModel = ViewModelProviders.of(activity!!, viewModelFactory)
                 .get(LightsViewModel::class.java)
 
         lightsViewModel.lights.observe(this, Observer<List<Light>> { t ->
@@ -61,11 +59,9 @@ class MainFragment : Fragment(), Injectable {
             layoutManager = GridLayoutManager(context, 3)
             lights_list.adapter = LightsAdapter(listOf(), object: OnLightClicked {
                 override fun onClick(light: Light) {
-                    val action = MainFragmentDirections.Action_MainFragment_to_BlankFragment()
-                    action.arguments?.putLong("lightId", light.id)
-                    view!!.findNavController().navigate(R.id.action_MainFragment_to_BlankFragment, Bundle().apply { putLong("lightId", light.id)})
+                    val action = LightsListFragmentDirections.Action_MainFragment_to_BlankFragment(light.id.toString())
+                    view?.findNavController()?.navigate(action)
                 }
-
             })
         }
     }

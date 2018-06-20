@@ -2,18 +2,22 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    app:startDestination="@id/fragment_nav_host">
+    app:startDestination="@id/lights_list_fragment">
     <fragment
-        android:id="@+id/fragment_nav_host"
-        android:name="lf.wo.enlight.ui.main.MainFragment"
+        android:id="@+id/lights_list_fragment"
+        android:name="lf.wo.enlight.ui.main.LightsListFragment"
         android:label="@string/title_of_fragment" >
     <action
         android:id="@+id/action_MainFragment_to_BlankFragment"
-        app:destination="@id/blankFragment" />
+        app:destination="@id/light_detail_fragment" />
     </fragment>
     <fragment
-        android:id="@+id/blankFragment"
-        android:name="lf.wo.enlight.ui.main.BlankFragment"
+        android:id="@+id/light_detail_fragment"
+        android:name="lf.wo.enlight.ui.main.LightDetailFragment"
         android:label="fragment_blank_fragment"
-        tools:layout="@layout/blank_fragment" />
+        tools:layout="@layout/light_detail_fragment" >
+        <argument
+            android:name="lightId"
+            app:type="string" />
+    </fragment>
 </navigation>

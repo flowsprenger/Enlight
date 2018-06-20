@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment
 import androidx.navigation.findNavController
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.support.HasSupportFragmentInjector
-import lf.wo.enlight.ui.main.MainFragment
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
@@ -19,7 +18,7 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
         setContentView(R.layout.main_activity)
         /*if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                    .replace(R.id.container, MainFragment.newInstance())
+                    .replace(R.id.container, LightsListFragment.newInstance())
                     .commitNow()
         }*/
     }

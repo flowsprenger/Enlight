@@ -1,43 +1,59 @@
 package lf.wo.enlight.ui.main
 
+import android.app.Application
+import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.ViewModel
-import android.util.Log
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
-import wo.lf.lifx.api.*
-import wo.lf.lifx.extensions.fireAndForget
-import wo.lf.lifx.net.UdpTransport
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
+import android.os.IBinder
+import lf.wo.enlight.AndroidLightService
+import lf.wo.enlight.IAndroidLightService
+import lf.wo.enlight.ILightsAddedDispatcher
+import wo.lf.lifx.api.Light
 import javax.inject.Inject
 
-class LightsViewModel  @Inject constructor(): ViewModel() {
 
-    private val mutableLights = MutableLiveData<List<Light>>().apply { value = listOf() }
-    val lights: LiveData<List<Light>> = mutableLights
+class LightsViewModel @Inject constructor(application: Application) : AndroidViewModel(application) {
+    val lights = LightsLiveData(application.applicationContext)
+}
 
-    val service: LightService
-
-    init {
-
-        service = LightService(UdpTransport, object : ILightChangeDispatcher {
-            override fun onLightAdded(light: Light) {
-                Log.w("MainActivity", "light added : ${light.id}")
-                LightSetPowerCommand.create(light, true, 10000).fireAndForget()
-                mutableLights.value = (mutableLights.value ?: listOf()) + light
-            }
-
-            override fun onLightChange(light: Light, property: LightProperty, oldValue: Any?, newValue: Any?) {
-                Log.w("MainActivity", "light ${light.id} changed $property from $oldValue to $newValue")
-            }
-        }, Schedulers.io(), AndroidSchedulers.mainThread()).apply { start() }
-
-
+class LightsLiveData(private val context: Context) : LiveData<List<Light>>(), ILightsAddedDispatcher {
+    override fun lightsChanged(value: List<Light>) {
+        postValue(value)
     }
 
-    override fun onCleared() {
-        service.stop()
-        super.onCleared()
+    private var service: IAndroidLightService? = null
+    private var bound = false
+
+    override fun onActive() {
+        if (!bound) {
+            context.bindService(Intent(context, AndroidLightService::class.java), connection, Context.BIND_AUTO_CREATE)
+        }
+    }
+
+    override fun onInactive() {
+        if (bound) {
+            context.unbindService(connection)
+            bound = false
+        }
+    }
+
+    private val connection = object : ServiceConnection {
+
+        override fun onServiceConnected(className: ComponentName,
+                                        serviceBinder: IBinder) {
+            val binder = serviceBinder as AndroidLightService.AndroidLightServiceBinder
+            this@LightsLiveData.service = binder.service.apply {
+                addChangeListener(this@LightsLiveData)
+                value = lights
+            }
+            bound = true
+        }
+
+        override fun onServiceDisconnected(arg0: ComponentName) {
+            bound = false
+        }
     }
 }

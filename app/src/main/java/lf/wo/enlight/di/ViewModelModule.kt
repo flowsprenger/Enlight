@@ -28,8 +28,8 @@ import kotlin.reflect.KClass
 abstract class ViewModelModule {
     @Binds
     @IntoMap
-    @ViewModelKey(BlankViewModel::class)
-    abstract fun bindUserViewModel(userViewModel: BlankViewModel): ViewModel
+    @ViewModelKey(LightDetailViewModel::class)
+    abstract fun bindUserViewModel(userViewModel: LightDetailViewModel): ViewModel
 
     @Binds
     @IntoMap
@@ -166,10 +166,10 @@ class AppModule {
 abstract class FragmentBuildersModule {
 
     @ContributesAndroidInjector
-    abstract fun contributeRepoFragment(): BlankFragment
+    abstract fun contributeRepoFragment(): LightDetailFragment
 
     @ContributesAndroidInjector
-    abstract fun contributeUserFragment(): MainFragment
+    abstract fun contributeUserFragment(): LightsListFragment
 
 
 }
