@@ -8,9 +8,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
-import lf.wo.enlight.AndroidLightService
-import lf.wo.enlight.IAndroidLightService
-import lf.wo.enlight.ILightsAddedDispatcher
+import lf.wo.enlight.lifx.AndroidLightService
+import lf.wo.enlight.lifx.IAndroidLightService
+import lf.wo.enlight.lifx.ILightsAddedDispatcher
 import wo.lf.lifx.api.Light
 import javax.inject.Inject
 

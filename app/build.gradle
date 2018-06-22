@@ -17,6 +17,12 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
     }
     buildTypes {
         release {
@@ -24,6 +30,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
 }
 
 
@@ -86,7 +93,7 @@ dependencies {
     // use -ktx for Kotlin
 
 
-    implementation 'wo.lf:rx-lifx:0.0.7.4'
+    implementation 'wo.lf:rx-lifx:0.0.8.1'
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
     implementation 'com.jaredrummler:colorpicker:1.0.2'
 

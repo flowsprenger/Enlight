@@ -18,7 +18,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".AndroidLightService" />
+        <service android:name=".lifx.AndroidLightService" />
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
 </manifest>
