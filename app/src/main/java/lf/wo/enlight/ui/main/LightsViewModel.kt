@@ -10,8 +10,9 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import lf.wo.enlight.lifx.AndroidLightService
 import lf.wo.enlight.lifx.IAndroidLightService
-import lf.wo.enlight.lifx.ILightsAddedDispatcher
+import lf.wo.enlight.lifx.ILightsChangedDispatcher
 import wo.lf.lifx.api.Light
+import wo.lf.lifx.api.LightProperty
 import javax.inject.Inject
 
 
@@ -19,7 +20,15 @@ class LightsViewModel @Inject constructor(application: Application) : AndroidVie
     val lights = LightsLiveData(application.applicationContext)
 }
 
-class LightsLiveData(private val context: Context) : LiveData<List<Light>>(), ILightsAddedDispatcher {
+class LightsLiveData(private val context: Context) : LiveData<List<Light>>(), ILightsChangedDispatcher {
+    override fun lightChanged(light: Light, property: LightProperty, oldValue: Any?, newValue: Any?) {
+        when (property) {
+            LightProperty.Color, LightProperty.Power, LightProperty.Reachable -> postValue(value)
+            else -> {
+            }
+        }
+    }
+
     override fun lightsChanged(value: List<Light>) {
         postValue(value)
     }

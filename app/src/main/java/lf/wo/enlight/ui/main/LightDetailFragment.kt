@@ -12,12 +12,10 @@ import android.view.ViewGroup
 import android.widget.SeekBar
 import kotlinx.android.synthetic.main.light_detail_fragment.*
 import lf.wo.enlight.R
+import lf.wo.enlight.kotlin.*
 import wo.lf.lifx.api.Light
 import wo.lf.lifx.api.LightSetColorCommand
 import wo.lf.lifx.api.LightSetPowerCommand
-import wo.lf.lifx.api.LightSetWaveformOptionalCommand
-import wo.lf.lifx.domain.HSBK
-import wo.lf.lifx.domain.PowerState
 import wo.lf.lifx.extensions.fireAndForget
 
 
@@ -54,11 +52,11 @@ class LightDetailFragment : Fragment() {
                     powerSwitch.isChecked = light.on
                 }
 
-                if (light.color.brightness.sliderScale != brightnessBar.progress) {
-                    brightnessBar.progress = light.color.brightness.sliderScale
+                if (light.color.brightness.toPercent != brightnessBar.progress) {
+                    brightnessBar.progress = light.color.brightness.toPercent
                 }
 
-                val rgb = Color.HSVToColor(floatArrayOf(light.color.hue.degreesAsFloat, light.color.saturation.asFloat, light.color.brightness.asFloat))
+                val rgb = Color.HSVToColor(floatArrayOf(light.color.hue.degreesToFloat, light.color.saturation.toUnsignedFloat, light.color.brightness.toUnsignedFloat))
                 if (rgb != colorPicker.color) {
                     Log.w("color", "updating to : $rgb ${light.color}")
                     colorPicker.color = rgb
@@ -77,7 +75,7 @@ class LightDetailFragment : Fragment() {
         brightnessBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 viewModel.light.value?.let { light ->
-                    LightSetColorCommand.create(light, light.color.copy(brightness = progress.asProtocolShort), 1000).fireAndForget()
+                    LightSetColorCommand.create(light, light.color.copy(brightness = progress.toUnsignedShort), 1000).fireAndForget()
                     // TODO debounce, use waveform optional (when appropriate?)
                     //LightSetWaveformOptionalCommand.create(light, )
                 }
@@ -96,47 +94,11 @@ class LightDetailFragment : Fragment() {
             Color.colorToHSV(color, hsv)
             Log.w("color", "onChanged : $color $hsv")
             viewModel.light.value?.let { light ->
-                LightSetColorCommand.create(light, light.color.copy(hue = hsv[0].asDegreeProtocolShort, saturation = hsv[1].asProtocolShort, brightness = hsv[2].asProtocolShort), 1000).fireAndForget()
+                LightSetColorCommand.create(light, light.color.copy(hue = hsv[0].toDegreeShort, saturation = hsv[1].toUnsignedShort, brightness = hsv[2].toUnsignedShort), 1000).fireAndForget()
             }
         }
     }
 }
 
-private val Short.asFloat: Float
-    get() {
-        return (this.toInt() and 0xFFFF).toFloat() / 65_535
-    }
 
-private val Short.degreesAsFloat: Float
-    get() {
-        return (this.toInt() and 0xFFFF).toFloat() / 65_535 * 360
-    }
 
-private fun HSBK.copy(hue: Short? = null, saturation: Short? = null, brightness: Short? = null, kelvin: Short? = null): HSBK {
-    return HSBK(hue = hue ?: this.hue, saturation = saturation
-            ?: this.saturation, brightness = brightness ?: this.brightness, kelvin = kelvin
-            ?: this.kelvin)
-}
-
-private val Float.asDegreeProtocolShort: Short
-    get() {
-        return (this * 65_535 / 360).toInt().toShort()
-    }
-
-private val Float.asProtocolShort: Short
-    get() {
-        return (this * 65_535).toInt().toShort()
-    }
-
-private val Int.asProtocolShort: Short
-    get() {
-        return (this * 65_535 / 100).toShort()
-    }
-
-private val Short.sliderScale: Int
-    get() {
-        return (this.toInt() and 0xFFFF) * 100 / 65_535
-    }
-
-private val Light.on: Boolean
-    get() = power == PowerState.ON

@@ -10,13 +10,21 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageButton
 import androidx.navigation.findNavController
 import kotlinx.android.synthetic.main.main_fragment.*
 import lf.wo.enlight.R
-import lf.wo.enlight.R.id.imageButton
 import lf.wo.enlight.di.Injectable
+import lf.wo.enlight.kotlin.on
+import lf.wo.enlight.kotlin.toColor
+import lf.wo.enlight.lifx.LightDefaults
+import wo.lf.lifx.api.ILightChangeDispatcher
 import wo.lf.lifx.api.Light
+import wo.lf.lifx.api.LightProperty
+import wo.lf.lifx.api.LightSetPowerCommand
+import wo.lf.lifx.domain.PowerState
+import wo.lf.lifx.extensions.fireAndForget
 import javax.inject.Inject
 
 class LightsListFragment : Fragment(), Injectable {
@@ -58,6 +66,10 @@ class LightsListFragment : Fragment(), Injectable {
         lights_list.apply {
             layoutManager = GridLayoutManager(context, 3)
             lights_list.adapter = LightsAdapter(listOf(), object: OnLightClicked {
+                override fun onPowerClick(light: Light) {
+                    LightSetPowerCommand.create(light, !light.on, LightDefaults.durationPower).fireAndForget()
+                }
+
                 override fun onClick(light: Light) {
                     val action = LightsListFragmentDirections.Action_MainFragment_to_BlankFragment(light.id.toString())
                     view?.findNavController()?.navigate(action)
@@ -74,6 +86,7 @@ class LightsListFragment : Fragment(), Injectable {
 
 interface OnLightClicked{
     fun onClick(light: Light)
+    fun onPowerClick(light: Light)
 }
 
 class LightsAdapter(lights: List<Light>, private val listener: OnLightClicked) : RecyclerView.Adapter<LightsAdapter.ViewHolder>() {
@@ -85,15 +98,44 @@ class LightsAdapter(lights: List<Light>, private val listener: OnLightClicked) :
         }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val x = itemView.findViewById<ImageButton>(imageButton)
+
+        val button: ImageButton = itemView.findViewById(R.id.imageButton)
+        val label: Button = itemView.findViewById(R.id.labelText)
+        val offline: View = itemView.findViewById(R.id.offline)
 
         fun bind(light: Light) {
-            x.setOnClickListener {
+
+            label.setOnClickListener {
                 listener.onClick(light)
             }
+
+            button.setOnClickListener {
+                listener.onPowerClick(light)
+            }
+
+            drawState(light)
+        }
+
+        private fun drawState(light: Light) {
+            if (light.reachable) {
+                offline.visibility = View.GONE
+            } else {
+                offline.visibility = View.VISIBLE
+            }
+
+            if (light.power == PowerState.ON) {
+                button.setImageResource(R.drawable.ic_lightbulb_on_outline)
+            } else {
+                button.setImageResource(R.drawable.ic_lightbulb_outline)
+            }
+            button.setColorFilter(light.color.toColor())
+
+            label.text = light.label
         }
 
     }
+
+
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(lights[position])
@@ -105,6 +147,4 @@ class LightsAdapter(lights: List<Light>, private val listener: OnLightClicked) :
     }
 
     override fun getItemCount(): Int = lights.size
-
-
 }

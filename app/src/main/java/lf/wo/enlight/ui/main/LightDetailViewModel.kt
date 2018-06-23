@@ -10,7 +10,7 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import lf.wo.enlight.lifx.AndroidLightService
 import lf.wo.enlight.lifx.IAndroidLightService
-import lf.wo.enlight.lifx.ILightsAddedDispatcher
+import lf.wo.enlight.lifx.ILightsChangedDispatcher
 import wo.lf.lifx.api.ILightChangeDispatcher
 import wo.lf.lifx.api.Light
 import wo.lf.lifx.api.LightProperty
@@ -24,14 +24,26 @@ class LightDetailViewModel @Inject constructor(application: Application) : Andro
     }
 }
 
-class LightLiveData(private val context: Context) : LiveData<Light>(), ILightChangeDispatcher, ILightsAddedDispatcher {
-    override fun lightsChanged(value: List<Light>) {
-        value.firstOrNull { it.id == id }?.let { light ->
-            service?.removeChangeListener(this)
-            bindLight(light)
-            postValue(light)
+class LightLiveData(private val context: Context) : LiveData<Light>(), ILightChangeDispatcher {
+
+    inner class AwaitLight : ILightsChangedDispatcher {
+        override fun lightChanged(light: Light, property: LightProperty, oldValue: Any?, newValue: Any?) {
+
+        }
+
+        override fun lightsChanged(value: List<Light>) {
+            value.firstOrNull { it.id == id }?.let { light ->
+                service?.removeChangeListener(this)
+                bindLight(light)
+                postValue(light)
+            }
         }
     }
+
+    val awaitLightListener by lazy {
+        AwaitLight()
+    }
+
 
     override fun onLightChange(light: Light, property: LightProperty, oldValue: Any?, newValue: Any?) {
         postValue(light)
@@ -60,7 +72,7 @@ class LightLiveData(private val context: Context) : LiveData<Light>(), ILightCha
             if (light != null) {
                 unbindLight(light)
             } else {
-                service?.removeChangeListener(this)
+                service?.removeChangeListener(awaitLightListener)
             }
             context.unbindService(connection)
             bound = false
@@ -84,7 +96,7 @@ class LightLiveData(private val context: Context) : LiveData<Light>(), ILightCha
                         postValue(light)
                     } else {
                         postValue(null)
-                        addChangeListener(this@LightLiveData)
+                        addChangeListener(awaitLightListener)
                     }
                 }
             }

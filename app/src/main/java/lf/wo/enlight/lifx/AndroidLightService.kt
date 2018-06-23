@@ -27,18 +27,18 @@ class AndroidLightService : Service(), IAndroidLightService, ILightsChangeDispat
 
     private val binder = AndroidLightServiceBinder()
 
-    private val listeners = mutableSetOf<ILightsAddedDispatcher>()
+    private val listeners = mutableSetOf<ILightsChangedDispatcher>()
 
     val db by lazy {
         Room.databaseBuilder(this,
                 LightDatabase::class.java, "database-name").build()
     }
 
-    override fun addChangeListener(listener: ILightsAddedDispatcher): Boolean {
+    override fun addChangeListener(listener: ILightsChangedDispatcher): Boolean {
         return listeners.add(listener)
     }
 
-    override fun removeChangeListener(listener: ILightsAddedDispatcher): Boolean {
+    override fun removeChangeListener(listener: ILightsChangedDispatcher): Boolean {
         return listeners.remove(listener)
     }
 
@@ -66,6 +66,7 @@ class AndroidLightService : Service(), IAndroidLightService, ILightsChangeDispat
 
     override fun onLightChange(light: Light, property: LightProperty, oldValue: Any?, newValue: Any?) {
         Log.w("AndroidLightService", "light ${light.id} changed $property from $oldValue to $newValue")
+        listeners.forEach { it.lightChanged(light, property, oldValue, newValue) }
     }
 
     override fun create(id: Long, source: ILightSource<LifxMessage<LifxMessagePayload>>, changeDispatcher: ILightsChangeDispatcher): Light {
@@ -145,15 +146,16 @@ private fun Light.toEntity(): LightEntity {
 }
 
 interface IAndroidLightService {
-    fun addChangeListener(listener: ILightsAddedDispatcher): Boolean
-    fun removeChangeListener(listener: ILightsAddedDispatcher): Boolean
+    fun addChangeListener(listener: ILightsChangedDispatcher): Boolean
+    fun removeChangeListener(listener: ILightsChangedDispatcher): Boolean
     val lights: List<Light>
     fun getLight(id: Long): Light?
 
 }
 
-interface ILightsAddedDispatcher {
+interface ILightsChangedDispatcher {
     fun lightsChanged(value: List<Light>)
+    fun lightChanged(light: Light, property: LightProperty, oldValue: Any?, newValue: Any?)
 }
 
 fun async(block: () -> Unit): Disposable {
