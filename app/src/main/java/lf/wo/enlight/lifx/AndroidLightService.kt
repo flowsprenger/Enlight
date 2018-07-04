@@ -1,6 +1,7 @@
 package lf.wo.enlight.lifx
 
 import android.app.Service
+import android.arch.persistence.room.Room
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
@@ -9,16 +10,15 @@ import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import wo.lf.lifx.net.UdpTransport
-import java.util.concurrent.TimeUnit
-import android.arch.persistence.room.Room
 import lf.wo.enlight.lifx.persistence.LightDatabase
 import lf.wo.enlight.lifx.persistence.LightEntity
 import wo.lf.lifx.api.*
 import wo.lf.lifx.domain.HSBK
 import wo.lf.lifx.domain.LifxMessagePayload
 import wo.lf.lifx.domain.PowerState
+import wo.lf.lifx.net.UdpTransport
 import java.net.InetAddress
+import java.util.concurrent.TimeUnit
 
 
 class AndroidLightService : Service(), IAndroidLightService, ILightsChangeDispatcher, ILightFactory {
@@ -51,7 +51,10 @@ class AndroidLightService : Service(), IAndroidLightService, ILightsChangeDispat
     private lateinit var lightsById: MutableMap<Long, Light>
 
     override fun getLight(id: Long): Light? {
-        return lightsById[id]
+        if (this::lightsById.isInitialized) {
+            return lightsById[id]
+        }
+        return null
     }
 
     override fun onLightAdded(light: Light) {
@@ -89,8 +92,14 @@ class AndroidLightService : Service(), IAndroidLightService, ILightsChangeDispat
                 val lightEntities = db.lightDao().getAll()
                 val lights = lightEntities.map { Light(it.id, service, this, it.toDefaultState()) }
                 lightsById = lights.associateBy { it.id }.toMutableMap()
-                this.lights = lights
-                service.start()
+                mainThread {
+                    this.lights = lights
+                }
+
+                async {
+                    service.start()
+                }
+
             }
         }
     }
@@ -107,7 +116,9 @@ class AndroidLightService : Service(), IAndroidLightService, ILightsChangeDispat
             Log.w("AndroidLightService", "service stopped")
             service.stop()
             db.lightDao().insertAll(lights.map { it.toEntity() })
-            lights = listOf()
+            mainThread {
+                lights = listOf()
+            }
             db.close()
             stopSelf()
         }
@@ -160,4 +171,8 @@ interface ILightsChangedDispatcher {
 
 fun async(block: () -> Unit): Disposable {
     return Completable.create { block() }.subscribeOn(Schedulers.io()).subscribe()
+}
+
+fun mainThread(block: () -> Unit): Disposable {
+    return Completable.create { block() }.subscribeOn(AndroidSchedulers.mainThread()).subscribe()
 }

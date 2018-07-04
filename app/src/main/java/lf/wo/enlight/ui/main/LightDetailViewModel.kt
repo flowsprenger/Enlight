@@ -3,6 +3,7 @@ package lf.wo.enlight.ui.main
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -19,10 +20,15 @@ import javax.inject.Inject
 class LightDetailViewModel @Inject constructor(application: Application) : AndroidViewModel(application) {
     val light = LightLiveData(application.applicationContext)
 
+    private val mutableSettings = MutableLiveData<LightDetailViewSettings>()
+    val settings = mutableSettings
+
     fun initialize(lightId: Long) {
         light.id = lightId
     }
 }
+
+class LightDetailViewSettings
 
 class LightLiveData(private val context: Context) : LiveData<Light>(), ILightChangeDispatcher {
 

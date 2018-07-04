@@ -35,12 +35,6 @@ val Short.degreesToFloat: Float
     }
 
 
-fun HSBK.copy(hue: Short? = null, saturation: Short? = null, brightness: Short? = null, kelvin: Short? = null): HSBK {
-    return HSBK(hue = hue ?: this.hue, saturation = saturation
-            ?: this.saturation, brightness = brightness ?: this.brightness, kelvin = kelvin
-            ?: this.kelvin)
-}
-
 
 val Short.toPercent: Int
     get() {

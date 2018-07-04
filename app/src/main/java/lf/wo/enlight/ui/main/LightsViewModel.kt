@@ -30,7 +30,7 @@ class LightsLiveData(private val context: Context) : LiveData<List<Light>>(), IL
     }
 
     override fun lightsChanged(value: List<Light>) {
-        postValue(value)
+        this.value = value
     }
 
     private var service: IAndroidLightService? = null
