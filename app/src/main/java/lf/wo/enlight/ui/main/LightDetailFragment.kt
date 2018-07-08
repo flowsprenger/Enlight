@@ -7,6 +7,8 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -22,7 +24,10 @@ import wo.lf.lifx.domain.PowerState
 import wo.lf.lifx.extensions.copy
 import wo.lf.lifx.extensions.fireAndForget
 
-class LightDetailFragment : Fragment() {
+class LightDetailFragment : Fragment(), IZoneClickedHandler {
+    override fun zoneClicked(zone: Int, selected: Boolean) {
+        viewModel.setSelection(zone, selected)
+    }
 
     companion object {
         fun newInstance() = LightDetailFragment()
@@ -37,6 +42,8 @@ class LightDetailFragment : Fragment() {
 
     private var inUpdate: Boolean = false
 
+    private lateinit var adapter: ZonesAdapter
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProviders.of(this).get(LightDetailViewModel::class.java)
@@ -44,6 +51,23 @@ class LightDetailFragment : Fragment() {
         val lightId = LightDetailFragmentArgs.fromBundle(arguments).lightId.toLong()
         viewModel.initialize(lightId)
 
+        viewModel.settings.observe(this, Observer { settings ->
+            if (settings == null) {
+
+            } else {
+                when (settings.selectionMode) {
+                    ZoneSelectionMode.ALL -> {
+                        selectionMode.setImageResource(R.drawable.ic_selection_off)
+                        adapter.selectedZones = setOf()
+                    }
+                    ZoneSelectionMode.INDIVIDUAL -> {
+                        selectionMode.setImageResource(R.drawable.ic_selection)
+                        adapter.selectedZones = settings.selectedZones
+                    }
+                }
+
+            }
+        })
 
         viewModel.light.observe(this, Observer<Light> { light: Light? ->
             if (light == null) {
@@ -54,9 +78,9 @@ class LightDetailFragment : Fragment() {
                 inUpdate = true
 
                 if (light.productInfo.hasMultiZoneSupport) {
-                    zoneGroup.visibility = View.GONE
-                } else {
                     zoneGroup.visibility = View.VISIBLE
+                } else {
+                    zoneGroup.visibility = View.GONE
                 }
 
                 if (lightName.text.toString() != light.label) {
@@ -71,20 +95,28 @@ class LightDetailFragment : Fragment() {
                     brightnessBar.progress = light.color.brightness.toPercent
                 }
 
-                val rgb = Color.HSVToColor(floatArrayOf(light.color.hue.degreesToFloat, light.color.saturation.toUnsignedFloat, light.color.brightness.toUnsignedFloat))
+                val displayedColor = if (viewModel.settings.value?.selectionMode == ZoneSelectionMode.INDIVIDUAL) {
+                    light.zones.colors[viewModel.settings.value?.selectedZones?.sorted()?.first()
+                            ?: 0]
+                } else {
+                    light.color
+                }
+                val rgb = Color.HSVToColor(floatArrayOf(displayedColor.hue.degreesToFloat, displayedColor.saturation.toUnsignedFloat, displayedColor.brightness.toUnsignedFloat))
                 if (rgb != colorPicker.color) {
                     Log.w("color", "updating to : $rgb ${light.color}")
                     colorPicker.color = rgb
                 }
 
-                ledState.adapter = ZonesAdapter(light, light.zones) // Zones(20, List(20) { light.color })) //)
+                adapter.light = light
+                adapter.zones = light.zones
 
                 inUpdate = false
             }
         })
 
         ledState.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        ledState.adapter = ZonesAdapter(viewModel.light.value, Zones(0, listOf()))
+        adapter = ZonesAdapter(null, Zones(0, listOf()), setOf(), this)
+        ledState.adapter = adapter
     }
 
     override fun onPause() {
@@ -108,7 +140,24 @@ class LightDetailFragment : Fragment() {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 viewModel.light.value?.let { light ->
                     if (!inUpdate) {
-                        LightSetBrightness.create(light, progress.toUnsignedShort, 1000).fireAndForget()
+                        val brightness = progress.toUnsignedShort
+                        if (viewModel.settings.value?.selectionMode == ZoneSelectionMode.INDIVIDUAL) {
+                            viewModel.settings.value?.selectedZones?.let {
+                                it.sorted().fold(listOf<Pair<IntRange, HSBK>>()) { acc, i ->
+                                    val last = acc.lastOrNull()
+                                    val color = light.zones.colors[i]
+                                    if (last != null && last.first.last + 1 == i && last.second == color) {
+                                        acc.dropLast(1).plus(Pair(IntRange(last.first.start, i), last.second))
+                                    } else {
+                                        acc.plus(Pair(IntRange(i, i), color))
+                                    }
+                                }.forEach {
+                                    MultiZoneSetColorCommand.create(light, it.second.copy(brightness = brightness), it.first.start, it.first.endInclusive, 50).fireAndForget()
+                                }
+                            }
+                        } else {
+                            LightSetBrightness.create(light, brightness, 1000).fireAndForget()
+                        }
                     }
                 }
             }
@@ -122,30 +171,87 @@ class LightDetailFragment : Fragment() {
         })
 
         colorPicker.setOnColorChangedListener { color ->
-            val hsv = floatArrayOf(0f, 0f, 0f)
-            Color.colorToHSV(color, hsv)
-            Log.w("color", "onChanged : $color $hsv")
             viewModel.light.value?.let { light ->
                 if (!inUpdate) {
-                    LightSetColorCommand.create(light, light.color.copy(hue = hsv[0].toDegreeShort, saturation = hsv[1].toUnsignedShort, brightness = hsv[2].toUnsignedShort), 1000).fireAndForget()
+                    val hsv = floatArrayOf(0f, 0f, 0f)
+                    Color.colorToHSV(color, hsv)
+                    Log.w("color", "onChanged : $color $hsv")
+                    val color = light.color.copy(hue = hsv[0].toDegreeShort, saturation = hsv[1].toUnsignedShort, brightness = hsv[2].toUnsignedShort)
+                    if (viewModel.settings.value?.selectionMode == ZoneSelectionMode.INDIVIDUAL) {
+                        viewModel.settings.value?.selectedZones?.let {
+                            it.sorted().fold(listOf<Pair<IntRange, HSBK>>()) { acc, i ->
+                                val last = acc.lastOrNull()
+                                if (last != null && last.first.last + 1 == i) {
+                                    acc.dropLast(1).plus(Pair(IntRange(last.first.start, i), last.second))
+                                } else {
+                                    acc.plus(Pair(IntRange(i, i), color))
+                                }
+                            }.forEach {
+                                MultiZoneSetColorCommand.create(light, color, it.first.start, it.first.endInclusive, 50).fireAndForget()
+                            }
+                        }
+                    } else {
+                        LightSetColorCommand.create(light, color, 1000).fireAndForget()
+                    }
                 }
             }
         }
+
+        selectionMode.setOnClickListener {
+            if (viewModel.settings.value?.selectionMode == ZoneSelectionMode.ALL) {
+                viewModel.setZoneSelectionMode(ZoneSelectionMode.INDIVIDUAL)
+            } else {
+                viewModel.setZoneSelectionMode(ZoneSelectionMode.ALL)
+            }
+        }
+
+        lightName.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                if (!inUpdate) {
+                    viewModel.light.value?.let { light ->
+                        DeviceSetLabelCommand.create(light, s.toString()).fireAndForget()
+                    }
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            }
+
+        })
     }
 }
 
-class ZonesAdapter(light: Light?, zones: Zones) : RecyclerView.Adapter<ZonesAdapter.ViewHolder>() {
+interface IZoneClickedHandler {
+    fun zoneClicked(zone: Int, selected: Boolean)
+}
+
+class ZonesAdapter(light: Light?, zones: Zones, selectedZones: Set<Int>, private val clickHandler: IZoneClickedHandler) : RecyclerView.Adapter<ZonesAdapter.ViewHolder>() {
 
     var light: Light? = light
         set(value) {
-            field = value
-            notifyDataSetChanged()
+            if (field != value) {
+                field = value
+                notifyDataSetChanged()
+            }
         }
 
     var zones: Zones = zones
         set(value) {
-            field = value
-            notifyDataSetChanged()
+            if (field != value) {
+                field = value
+                notifyDataSetChanged()
+            }
+        }
+
+    var selectedZones: Set<Int> = selectedZones
+        set(value) {
+            if (field != value) {
+                field = value
+                notifyDataSetChanged()
+            }
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -158,19 +264,28 @@ class ZonesAdapter(light: Light?, zones: Zones) : RecyclerView.Adapter<ZonesAdap
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(light, zones.colors[position])
+        holder.bind(light, position, zones.colors[position], selectedZones.contains(position))
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val icon: ImageView = itemView.findViewById(R.id.ledIcon)
 
-        fun bind(light: Light?, hsbk: HSBK) {
+        fun bind(light: Light?, zone: Int, hsbk: HSBK, selected: Boolean) {
             if (hsbk.brightness.toUnsignedFloat > 0.005 && light?.power == PowerState.ON) {
                 icon.setImageResource(R.drawable.ic_led_on)
             } else {
                 icon.setImageResource(R.drawable.ic_led_off)
             }
-            icon.setColorFilter(hsbk.toColor())
+            icon.setColorFilter(hsbk.toColorFullBrightness())
+            if (selected) {
+                icon.background = icon.resources.getDrawable(R.drawable.ic_selection)
+            } else {
+                icon.background = null
+            }
+
+            icon.setOnClickListener {
+                clickHandler.zoneClicked(zone, !selected)
+            }
         }
 
     }

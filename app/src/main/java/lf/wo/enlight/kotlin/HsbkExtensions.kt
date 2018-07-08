@@ -9,6 +9,11 @@ fun HSBK.toColor(): Int {
     return Color.HSVToColor(floatArrayOf(hue.degreesToFloat, saturation.toUnsignedFloat, brightness.toUnsignedFloat))
 }
 
+fun HSBK.toColorFullBrightness(): Int {
+    return Color.HSVToColor(floatArrayOf(hue.degreesToFloat, saturation.toUnsignedFloat, 1f))
+}
+
+
 val Float.toDegreeShort: Short
     get() {
         return (this * 65_535 / 360).toInt().toShort()
