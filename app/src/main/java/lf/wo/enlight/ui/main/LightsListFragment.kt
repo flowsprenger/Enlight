@@ -19,9 +19,7 @@ import lf.wo.enlight.di.Injectable
 import lf.wo.enlight.kotlin.on
 import lf.wo.enlight.kotlin.toColor
 import lf.wo.enlight.lifx.LightDefaults
-import wo.lf.lifx.api.ILightChangeDispatcher
 import wo.lf.lifx.api.Light
-import wo.lf.lifx.api.LightProperty
 import wo.lf.lifx.api.LightSetPowerCommand
 import wo.lf.lifx.domain.PowerState
 import wo.lf.lifx.extensions.fireAndForget
@@ -71,7 +69,7 @@ class LightsListFragment : Fragment(), Injectable {
                 }
 
                 override fun onClick(light: Light) {
-                    val action = LightsListFragmentDirections.Action_MainFragment_to_BlankFragment(light.id.toString())
+                    val action = LightsListFragmentDirections.actionMainFragmentToBlankFragment(light.id.toString())
                     view?.findNavController()?.navigate(action)
                 }
             })

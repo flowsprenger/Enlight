@@ -18,6 +18,6 @@
         tools:layout="@layout/light_detail_fragment" >
         <argument
             android:name="lightId"
-            app:type="string" />
+            app:argType="string" />
     </fragment>
 </navigation>
