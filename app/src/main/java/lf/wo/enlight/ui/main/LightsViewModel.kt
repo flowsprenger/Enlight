@@ -1,13 +1,13 @@
 package lf.wo.enlight.ui.main
 
 import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.LiveData
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import lf.wo.enlight.lifx.AndroidLightService
 import lf.wo.enlight.lifx.IAndroidLightService
 import lf.wo.enlight.lifx.ILightsChangedDispatcher

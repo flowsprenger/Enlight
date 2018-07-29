@@ -9,14 +9,14 @@ apply plugin: 'kotlin-kapt'
 apply plugin: "androidx.navigation.safeargs"
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
     defaultConfig {
         applicationId "lf.wo.enlight"
-        minSdkVersion 15
-        targetSdkVersion 27
+        minSdkVersion 18
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         javaCompileOptions {
             annotationProcessorOptions {
@@ -39,50 +39,50 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-    implementation 'com.android.support:appcompat-v7:27.1.1'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.1'
-    implementation 'com.android.support:support-v4:27.1.1'
-    implementation 'android.arch.lifecycle:extensions:1.1.1'
+    implementation 'androidx.appcompat:appcompat:1.0.0-beta01'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha1'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0-beta01'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0-beta01'
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    androidTestImplementation 'androidx.test:runner:1.1.0-alpha4'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha4'
 
 
     def lifecycle_version = "1.1.1"
 
     // ViewModel and LiveData
-    implementation "android.arch.lifecycle:extensions:$lifecycle_version"
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0-beta01'
     // alternatively - just ViewModel
-    implementation "android.arch.lifecycle:viewmodel:$lifecycle_version" // use -ktx for Kotlin
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.0.0-beta01' // use -ktx for Kotlin
     // alternatively - just LiveData
-    implementation "android.arch.lifecycle:livedata:$lifecycle_version"
+    implementation 'androidx.lifecycle:lifecycle-livedata:2.0.0-beta01'
     // alternatively - Lifecycles only (no ViewModel or LiveData).
     //     Support library depends on this lightweight import
-    implementation "android.arch.lifecycle:runtime:$lifecycle_version"
+    implementation 'androidx.lifecycle:lifecycle-runtime:2.0.0-beta01'
 
-    kapt "android.arch.lifecycle:compiler:$lifecycle_version"
+    kapt 'androidx.lifecycle:lifecycle-compiler:2.0.0-beta01'
     // alternately - if using Java8, use the following instead of compiler
     //implementation "android.arch.lifecycle:common-java8:$lifecycle_version"
 
     // optional - ReactiveStreams support for LiveData
-    implementation "android.arch.lifecycle:reactivestreams:$lifecycle_version"
+    implementation 'androidx.lifecycle:lifecycle-reactivestreams:2.0.0-beta01'
 
     // optional - Test helpers for LiveData
-    testImplementation "android.arch.core:core-testing:$lifecycle_version"
+    testImplementation 'androidx.arch.core:core-testing:2.0.0-beta01'
 
     def room_version = "1.1.1" // or, for latest rc, use "1.1.1-rc1"
 
-    implementation "android.arch.persistence.room:runtime:$room_version"
-    kapt "android.arch.persistence.room:compiler:$room_version"
+    implementation 'androidx.room:room-runtime:2.0.0-beta01'
+    kapt 'androidx.room:room-compiler:2.0.0-beta01'
 
     // optional - RxJava support for Room
-    implementation "android.arch.persistence.room:rxjava2:$room_version"
+    implementation 'androidx.room:room-rxjava2:2.0.0-beta01'
 
     // optional - Guava support for Room, including Optional and ListenableFuture
-    implementation "android.arch.persistence.room:guava:$room_version"
+    implementation 'androidx.room:room-guava:2.0.0-beta01'
 
     // Test helpers
-    testImplementation "android.arch.persistence.room:testing:$room_version"
+    testImplementation 'androidx.room:room-testing:2.0.0-beta01'
 
     def nav_version = "1.0.0-alpha04"
 

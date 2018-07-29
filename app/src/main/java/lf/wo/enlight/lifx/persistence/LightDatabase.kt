@@ -1,7 +1,7 @@
 package lf.wo.enlight.lifx.persistence
 
-import android.arch.persistence.room.RoomDatabase
-import android.arch.persistence.room.Database
+import androidx.room.Database
+import androidx.room.RoomDatabase
 
 
 @Database(entities = [(LightEntity::class)], version = 1)

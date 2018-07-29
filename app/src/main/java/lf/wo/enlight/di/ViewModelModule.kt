@@ -2,12 +2,12 @@ package lf.wo.enlight.di
 
 import android.app.Activity
 import android.app.Application
-import android.arch.lifecycle.ViewModel
-import android.arch.lifecycle.ViewModelProvider
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentActivity
-import android.support.v4.app.FragmentManager
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import dagger.*
 import dagger.android.AndroidInjection
 import dagger.android.AndroidInjectionModule
@@ -20,7 +20,6 @@ import lf.wo.enlight.MainActivity
 import lf.wo.enlight.ui.main.*
 import lf.wo.enlight.viewmodel.LightViewModelFactory
 import javax.inject.Singleton
-
 import kotlin.reflect.KClass
 
 @Suppress("unused")
