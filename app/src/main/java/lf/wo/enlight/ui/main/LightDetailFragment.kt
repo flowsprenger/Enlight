@@ -152,7 +152,7 @@ class LightDetailFragment : Fragment(), IZoneClickedHandler {
                                         acc.plus(Pair(IntRange(i, i), color))
                                     }
                                 }.forEach {
-                                    MultiZoneSetColorCommand.create(light, it.second.copy(brightness = brightness), it.first.start, it.first.endInclusive, 50).fireAndForget()
+                                    MultiZoneSetColorZonesCommand.create(light, it.second.copy(brightness = brightness), it.first.start, it.first.endInclusive, 50).fireAndForget()
                                 }
                             }
                         } else {
@@ -187,7 +187,7 @@ class LightDetailFragment : Fragment(), IZoneClickedHandler {
                                     acc.plus(Pair(IntRange(i, i), color))
                                 }
                             }.forEach {
-                                MultiZoneSetColorCommand.create(light, color, it.first.start, it.first.endInclusive, 50).fireAndForget()
+                                MultiZoneSetColorZonesCommand.create(light, color, it.first.start, it.first.endInclusive, 50).fireAndForget()
                             }
                         }
                     } else {

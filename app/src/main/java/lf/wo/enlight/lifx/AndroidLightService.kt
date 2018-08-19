@@ -21,7 +21,8 @@ import java.net.InetAddress
 import java.util.concurrent.TimeUnit
 
 
-class AndroidLightService : Service(), IAndroidLightService, ILightsChangeDispatcher, ILightFactory {
+class AndroidLightService : Service(), IAndroidLightService, ILightsChangeDispatcher, ILightFactory, IGroupLocationChangeListener {
+
 
     private var unbindTimeout: Disposable? = null
 
@@ -72,13 +73,37 @@ class AndroidLightService : Service(), IAndroidLightService, ILightsChangeDispat
         listeners.forEach { it.lightChanged(light, property, oldValue, newValue) }
     }
 
+    override fun groupAdded(location: Location, group: Group) {
+        listeners.forEach(ILightsChangedDispatcher::groupsLocationChanged)
+    }
+
+    override fun groupRemoved(location: Location, group: Group) {
+        listeners.forEach(ILightsChangedDispatcher::groupsLocationChanged)
+    }
+
+    override fun locationAdded(newLocation: Location) {
+        listeners.forEach(ILightsChangedDispatcher::groupsLocationChanged)
+    }
+
+    override fun locationGroupChanged(location: Location, group: Group, light: Light) {
+        listeners.forEach(ILightsChangedDispatcher::groupsLocationChanged)
+    }
+
+    override fun locationRemoved(location: Location) {
+        listeners.forEach(ILightsChangedDispatcher::groupsLocationChanged)
+    }
+
     override fun create(id: Long, source: ILightSource<LifxMessage<LifxMessagePayload>>, changeDispatcher: ILightsChangeDispatcher): Light {
         return lightsById[id] ?: Light(id, source, changeDispatcher)
     }
 
-    val service = LightService(
+    override val locations
+        get() = groupLocationManager.locations
+
+    private val groupLocationManager = LocationGroupManager(this, this)
+    private val service = LightService(
             transportFactory = UdpTransport,
-            changeDispatcher = this,
+            changeDispatcher = groupLocationManager,
             lightFactory = this,
             ioScheduler = Schedulers.io(),
             observeScheduler = AndroidSchedulers.mainThread()
@@ -161,10 +186,12 @@ interface IAndroidLightService {
     fun removeChangeListener(listener: ILightsChangedDispatcher): Boolean
     val lights: List<Light>
     fun getLight(id: Long): Light?
+    val locations: List<Location>
 
 }
 
 interface ILightsChangedDispatcher {
+    fun groupsLocationChanged()
     fun lightsChanged(value: List<Light>)
     fun lightChanged(light: Light, property: LightProperty, oldValue: Any?, newValue: Any?)
 }
