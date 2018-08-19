@@ -19,7 +19,7 @@ class LightsLiveData(context: Context) : AbstractAndroidLightServiceLiveData<Lis
     }
 
     override fun lightsChanged(value: List<Light>) {
-        this.value = value
+        postValue(value)
     }
 
     override fun unbindService(service: IAndroidLightService?) {

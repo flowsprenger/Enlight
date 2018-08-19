@@ -94,7 +94,7 @@ class AndroidLightService : Service(), IAndroidLightService, ILightsChangeDispat
     }
 
     override fun create(id: Long, source: ILightSource<LifxMessage<LifxMessagePayload>>, changeDispatcher: ILightsChangeDispatcher): Light {
-        return lightsById[id] ?: Light(id, source, changeDispatcher)
+        return lightsById[id] ?: Light(id, source, groupLocationManager)
     }
 
     override val locations
@@ -115,16 +115,16 @@ class AndroidLightService : Service(), IAndroidLightService, ILightsChangeDispat
             Log.w("AndroidLightService", "service started")
             async {
                 val lightEntities = db.lightDao().getAll()
-                val lights = lightEntities.map { Light(it.id, service, this, it.toDefaultState()) }
+                val lights = lightEntities.map { Light(it.id, service, groupLocationManager, it.toDefaultState()) }
                 lightsById = lights.associateBy { it.id }.toMutableMap()
                 mainThread {
                     this.lights = lights
-                }
+                    lights.forEach { groupLocationManager.onLightAdded(it) }
 
-                async {
-                    service.start()
+                    async {
+                        service.start()
+                    }
                 }
-
             }
         }
     }

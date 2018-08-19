@@ -9,7 +9,7 @@ import wo.lf.lifx.api.Location
 
 class LightLocationLiveData(context: Context) : AbstractAndroidLightServiceLiveData<List<Location>>(context), ILightsChangedDispatcher {
     override fun groupsLocationChanged() {
-        value = service?.locations
+        postValue(service?.locations)
     }
 
     override fun lightChanged(light: Light, property: LightProperty, oldValue: Any?, newValue: Any?) {

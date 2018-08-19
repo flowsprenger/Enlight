@@ -19,8 +19,7 @@ import lf.wo.enlight.di.Injectable
 import lf.wo.enlight.kotlin.on
 import lf.wo.enlight.kotlin.toColor
 import lf.wo.enlight.lifx.LightDefaults
-import wo.lf.lifx.api.Light
-import wo.lf.lifx.api.LightSetPowerCommand
+import wo.lf.lifx.api.*
 import wo.lf.lifx.domain.PowerState
 import wo.lf.lifx.extensions.fireAndForget
 import javax.inject.Inject
@@ -52,20 +51,19 @@ class LightsListFragment : Fragment(), Injectable {
         lightsViewModel = ViewModelProviders.of(activity!!, viewModelFactory)
                 .get(LightsViewModel::class.java)
 
-        lightsViewModel.lights.observe(this, Observer<List<Light>> { t ->
-            lightsUpdated(t ?: listOf())
+        lightsViewModel.locations.observe(this, Observer<List<Location>> { t ->
+            lightsUpdated(t.flatToHierarchy() ?: listOf())
         })
 
-        // to_blank.setOnClickListener{ view ->
-        //     val action = MainFragmentDirections.Action_MainFragment_to_BlankFragment()
-        //     view.findNavController().navigate(action)
-        // }
+        lightsViewModel.lights.observe(this, Observer<List<Light>> { t ->
+            lightsUpdated(lightsViewModel.locations.value?.flatToHierarchy() ?: listOf())
+        })
 
         lights_list.apply {
             layoutManager = GridLayoutManager(context, 3)
-            lights_list.adapter = LightsAdapter(listOf(), object: OnLightClicked {
-                override fun onPowerClick(light: Light) {
-                    LightSetPowerCommand.create(light, !light.on, LightDefaults.durationPower).fireAndForget()
+            lights_list.adapter = LightsAdapter(listOf(), object : OnLightClicked {
+                override fun onPowerClick(entity: LifxEntity) {
+                    entity.lights.forEach { light -> LightSetPowerCommand.create(light, !light.on, LightDefaults.durationPower).fireAndForget() }
                 }
 
                 override fun onClick(light: Light) {
@@ -76,20 +74,24 @@ class LightsListFragment : Fragment(), Injectable {
         }
     }
 
-    private fun lightsUpdated(lights: List<Light>) {
+    private fun lightsUpdated(lights: List<LifxEntity>) {
         (lights_list.adapter as LightsAdapter).lights = lights
     }
 
 }
 
-interface OnLightClicked{
-    fun onClick(light: Light)
-    fun onPowerClick(light: Light)
+private fun List<Location>.flatToHierarchy(): List<LifxEntity>? {
+    return flatMap { listOf(it) + it.groups.flatMap { listOf(it as LifxEntity) + it.lights.map { it as LifxEntity } } }
 }
 
-class LightsAdapter(lights: List<Light>, private val listener: OnLightClicked) : RecyclerView.Adapter<LightsAdapter.ViewHolder>() {
+interface OnLightClicked {
+    fun onClick(light: Light)
+    fun onPowerClick(entity: LifxEntity)
+}
 
-    var lights: List<Light> = lights
+class LightsAdapter(lights: List<LifxEntity>, private val listener: OnLightClicked) : RecyclerView.Adapter<LightsAdapter.ViewHolder>() {
+
+    var lights: List<LifxEntity> = lights
         set(value) {
             field = value
             notifyDataSetChanged()
@@ -101,7 +103,7 @@ class LightsAdapter(lights: List<Light>, private val listener: OnLightClicked) :
         val label: Button = itemView.findViewById(R.id.labelText)
         val offline: View = itemView.findViewById(R.id.offline)
 
-        fun bind(light: Light) {
+        fun bindLight(light: Light) {
 
             label.setOnClickListener {
                 listener.onClick(light)
@@ -111,10 +113,10 @@ class LightsAdapter(lights: List<Light>, private val listener: OnLightClicked) :
                 listener.onPowerClick(light)
             }
 
-            drawState(light)
+            drawLightState(light)
         }
 
-        private fun drawState(light: Light) {
+        private fun drawLightState(light: Light) {
             if (light.reachable) {
                 offline.visibility = View.GONE
             } else {
@@ -131,15 +133,80 @@ class LightsAdapter(lights: List<Light>, private val listener: OnLightClicked) :
             label.text = light.label
         }
 
-    }
+        fun bindGroup(group: Group) {
 
+            button.setOnClickListener {
+                listener.onPowerClick(group)
+            }
+
+            drawGroupState(group)
+        }
+
+        private fun drawGroupState(group: Group) {
+            if (group.lights.any { it.reachable }) {
+                offline.visibility = View.GONE
+            } else {
+                offline.visibility = View.VISIBLE
+            }
+
+            if (group.lights.any { it.power == PowerState.ON }) {
+                button.setImageResource(R.drawable.ic_group_on)
+            } else {
+                button.setImageResource(R.drawable.ic_group_off)
+            }
+
+            label.text = group.name
+        }
+
+        fun bindLocation(location: Location) {
+
+            button.setOnClickListener {
+                listener.onPowerClick(location)
+            }
+
+            drawLocationState(location)
+        }
+
+        private fun drawLocationState(location: Location) {
+            if (location.lights.any { it.reachable }) {
+                offline.visibility = View.GONE
+            } else {
+                offline.visibility = View.VISIBLE
+            }
+
+            if (location.lights.any { it.power == PowerState.ON }) {
+                button.setImageResource(R.drawable.ic_location_on)
+            } else {
+                button.setImageResource(R.drawable.ic_location_off)
+            }
+
+            label.text = location.name
+        }
+
+    }
 
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(lights[position])
+        val entity = lights[position]
+        when (entity) {
+            is Light -> holder.bindLight(entity)
+            is Group -> holder.bindGroup(entity)
+            is Location -> holder.bindLocation(entity)
+        }
+
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        val entity = lights[position]
+        return when (entity) {
+            is Location -> R.layout.light_list_item_location
+            is Group -> R.layout.light_list_item_group
+            is Light -> R.layout.light_list_item
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+
         return ViewHolder(LayoutInflater.from(parent.context)
                 .inflate(R.layout.light_list_item, parent, false))
     }
