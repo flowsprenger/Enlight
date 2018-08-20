@@ -1,0 +1,171 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "a126f7dd15bc7eb57e19880240dd1318",
+    "entities": [
+      {
+        "tableName": "lights",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `address` TEXT NOT NULL, `last_seen_at` INTEGER NOT NULL, `label` TEXT NOT NULL, `hue` INTEGER NOT NULL, `saturation` INTEGER NOT NULL, `brightness` INTEGER NOT NULL, `kelvin` INTEGER NOT NULL, `power` INTEGER NOT NULL, `infrared_brightness` INTEGER NOT NULL, `zones` TEXT NOT NULL, `locationid` BLOB NOT NULL, `locationlabel` TEXT NOT NULL, `locationupdated_at` INTEGER NOT NULL, `groupid` BLOB NOT NULL, `grouplabel` TEXT NOT NULL, `groupupdated_at` INTEGER NOT NULL, `hostFirmwarebuild` INTEGER NOT NULL, `hostFirmwareversion` INTEGER NOT NULL, `wifiFirmwarebuild` INTEGER NOT NULL, `wifiFirmwareversion` INTEGER NOT NULL, `vendor_id` INTEGER NOT NULL, `product_id` INTEGER NOT NULL, `product_version` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "address",
+            "columnName": "address",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastSeenAt",
+            "columnName": "last_seen_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "label",
+            "columnName": "label",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hue",
+            "columnName": "hue",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saturation",
+            "columnName": "saturation",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "brightness",
+            "columnName": "brightness",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kelvin",
+            "columnName": "kelvin",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "power",
+            "columnName": "power",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "infraredBrightness",
+            "columnName": "infrared_brightness",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zones",
+            "columnName": "zones",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "location.id",
+            "columnName": "locationid",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "location.label",
+            "columnName": "locationlabel",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "location.updatedAt",
+            "columnName": "locationupdated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "group.id",
+            "columnName": "groupid",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "group.label",
+            "columnName": "grouplabel",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "group.updatedAt",
+            "columnName": "groupupdated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hostFirmware.build",
+            "columnName": "hostFirmwarebuild",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hostFirmware.version",
+            "columnName": "hostFirmwareversion",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wifiFirmware.build",
+            "columnName": "wifiFirmwarebuild",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wifiFirmware.version",
+            "columnName": "wifiFirmwareversion",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "productVersion.vendorId",
+            "columnName": "vendor_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "productVersion.productId",
+            "columnName": "product_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "productVersion.version",
+            "columnName": "product_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"a126f7dd15bc7eb57e19880240dd1318\")"
+    ]
+  }
+}

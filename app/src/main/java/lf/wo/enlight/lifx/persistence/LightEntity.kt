@@ -1,6 +1,7 @@
 package lf.wo.enlight.lifx.persistence
 
 import androidx.room.ColumnInfo
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -32,5 +33,53 @@ data class LightEntity(
         val kelvin: Int,
 
         @ColumnInfo(name = "power")
-        val power: Int
+        val power: Int,
+
+        @Embedded(prefix = "location")
+        val location: LocationOrGroupEntity,
+
+        @Embedded(prefix = "group")
+        val group: LocationOrGroupEntity,
+
+        @Embedded(prefix = "hostFirmware")
+        val hostFirmware: FirmwareVersionEntity,
+
+        @Embedded(prefix = "wifiFirmware")
+        val wifiFirmware: FirmwareVersionEntity,
+
+        @Embedded
+        val productVersion: ProductVersionEntity,
+
+        @ColumnInfo(name = "infrared_brightness")
+        val infraredBrightness: Short,
+
+        @ColumnInfo(name = "zones")
+        val zones: String
+)
+
+data class LocationOrGroupEntity(
+        @ColumnInfo(name = "id")
+        val id: ByteArray,
+
+        @ColumnInfo(name = "label")
+        val label: String,
+
+        @ColumnInfo(name = "updated_at")
+        val updatedAt: Long
+)
+
+data class FirmwareVersionEntity(
+        @ColumnInfo(name = "build")
+        val build: Long,
+        @ColumnInfo(name = "version")
+        val version: Int
+)
+
+data class ProductVersionEntity(
+        @ColumnInfo(name = "vendor_id")
+        val vendorId: Int,
+        @ColumnInfo(name = "product_id")
+        val productId: Int,
+        @ColumnInfo(name = "product_version")
+        val version: Int
 )

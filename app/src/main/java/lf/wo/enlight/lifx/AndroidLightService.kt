@@ -10,19 +10,15 @@ import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import lf.wo.enlight.lifx.persistence.LightDatabase
-import lf.wo.enlight.lifx.persistence.LightEntity
+import lf.wo.enlight.lifx.persistence.*
 import wo.lf.lifx.api.*
-import wo.lf.lifx.domain.HSBK
-import wo.lf.lifx.domain.LifxMessagePayload
-import wo.lf.lifx.domain.PowerState
+import wo.lf.lifx.domain.*
 import wo.lf.lifx.net.UdpTransport
 import java.net.InetAddress
 import java.util.concurrent.TimeUnit
 
 
 class AndroidLightService : Service(), IAndroidLightService, ILightsChangeDispatcher, ILightFactory, IGroupLocationChangeListener {
-
 
     private var unbindTimeout: Disposable? = null
 
@@ -32,7 +28,7 @@ class AndroidLightService : Service(), IAndroidLightService, ILightsChangeDispat
 
     val db by lazy {
         Room.databaseBuilder(this,
-                LightDatabase::class.java, "database-name").build()
+                LightDatabase::class.java, "database-name").fallbackToDestructiveMigration().build()
     }
 
     override fun addChangeListener(listener: ILightsChangedDispatcher): Boolean {
@@ -163,7 +159,33 @@ private fun LightEntity.toDefaultState(): DefaultLightState {
             reachable = false,
             label = label,
             color = HSBK(hue.toShort(), saturation.toShort(), brightness.toShort(), kelvin.toShort()),
-            power = if (power == 1) PowerState.ON else PowerState.OFF
+            power = if (power == 1) PowerState.ON else PowerState.OFF,
+            location = StateLocation(location.id.toTypedArray(), location.label.toByteArray(), location.updatedAt),
+            group = StateGroup(group.id.toTypedArray(), group.label.toByteArray(), group.updatedAt),
+            hostFirmware = FirmwareVersion(hostFirmware.build, hostFirmware.version),
+            wifiFirmware = FirmwareVersion(wifiFirmware.build, wifiFirmware.version),
+            productInfo = ProductInfo(productVersion.vendorId, productVersion.productId, productVersion.version),
+            infraredBrightness = infraredBrightness,
+            zones = zones.toZones()
+    )
+}
+
+private fun String.toZones(): Zones {
+    if (this.isEmpty()) {
+        return Zones(0, listOf())
+    }
+    val components = split(',')
+    return Zones(
+            count = components.size,
+            colors = components.map {
+                val hsbkArray = it.split('!')
+                HSBK(
+                        hsbkArray[0].toShort(),
+                        hsbkArray[1].toShort(),
+                        hsbkArray[2].toShort(),
+                        hsbkArray[3].toShort()
+                )
+            }
     )
 }
 
@@ -177,7 +199,18 @@ private fun Light.toEntity(): LightEntity {
             saturation = color.saturation.toInt() and 0xFFFF,
             brightness = color.brightness.toInt() and 0xFFFF,
             kelvin = color.kelvin.toInt() and 0xFFFF,
-            power = power.ordinal
+            power = power.ordinal,
+            location = LocationOrGroupEntity(location.location.toByteArray(), location.name, location.updated_at),
+            group = LocationOrGroupEntity(group.group.toByteArray(), group.name, group.updated_at),
+            hostFirmware = FirmwareVersionEntity(hostFirmware.build, hostFirmware.version),
+            wifiFirmware = FirmwareVersionEntity(wifiFirmware.build, wifiFirmware.version),
+            productVersion = ProductVersionEntity(productInfo.vendorId, productInfo.productId, productInfo.version),
+            infraredBrightness = infraredBrightness,
+            zones = zones.colors.map { hsbk ->
+                with(hsbk) {
+                    "$hue!$saturation!$brightness!$kelvin"
+                }
+            }.joinToString { it }
     )
 }
 
