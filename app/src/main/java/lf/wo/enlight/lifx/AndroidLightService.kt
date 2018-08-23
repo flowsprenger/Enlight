@@ -1,3 +1,13 @@
+/*
+
+  Copyright (c) 2018 Florian Sprenger
+
+  This Source Code Form is subject to the terms of the Mozilla Public
+  License, v. 2.0. If a copy of the MPL was not distributed with this
+  file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+ */
+
 package lf.wo.enlight.lifx
 
 import android.app.Service
@@ -180,10 +190,10 @@ private fun String.toZones(): Zones {
             colors = components.map {
                 val hsbkArray = it.split('!')
                 HSBK(
-                        hsbkArray[0].toShort(),
-                        hsbkArray[1].toShort(),
-                        hsbkArray[2].toShort(),
-                        hsbkArray[3].toShort()
+                        hsbkArray[0].trim().toInt().toShort(),
+                        hsbkArray[1].trim().toInt().toShort(),
+                        hsbkArray[2].trim().toInt().toShort(),
+                        hsbkArray[3].trim().toInt().toShort()
                 )
             }
     )

@@ -1,3 +1,13 @@
+/*
+
+  Copyright (c) 2018 Florian Sprenger
+
+  This Source Code Form is subject to the terms of the Mozilla Public
+  License, v. 2.0. If a copy of the MPL was not distributed with this
+  file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+ */
+
 package lf.wo.enlight.di
 
 import android.app.Activity
@@ -124,41 +134,7 @@ object AppInjector {
 }
 
 @Module(includes = [ViewModelModule::class])
-class AppModule {
-    /*
-    @Singleton
-    @Provides
-    fun provideGithubService(): GithubService {
-        return Retrofit.Builder()
-                .baseUrl("https://api.github.com/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(LiveDataCallAdapterFactory())
-                .build()
-                .create(GithubService::class.java)
-    }
-
-    @Singleton
-    @Provides
-    fun provideDb(app: Application): GithubDb {
-        return Room
-                .databaseBuilder(app, GithubDb::class.java, "github.db")
-                .fallbackToDestructiveMigration()
-                .build()
-    }
-
-    @Singleton
-    @Provides
-    fun provideUserDao(db: GithubDb): UserDao {
-        return db.userDao()
-    }
-
-    @Singleton
-    @Provides
-    fun provideRepoDao(db: GithubDb): RepoDao {
-        return db.repoDao()
-    }
-    */
-}
+class AppModule
 
 @Suppress("unused")
 @Module
