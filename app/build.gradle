@@ -42,52 +42,52 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.support:multidex:1.0.3'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.0.0-beta01'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha1'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0-beta01'
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0-beta01'
+    implementation 'androidx.appcompat:appcompat:1.0.0-rc01'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha2'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0-rc01'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0-rc01'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.0-alpha4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha4'
 
 
-    def lifecycle_version = "1.1.1"
+    def lifecycle_version = "2.0.0-rc01"
 
     // ViewModel and LiveData
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0-beta01'
+    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
     // alternatively - just ViewModel
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.0.0-beta01' // use -ktx for Kotlin
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     // alternatively - just LiveData
-    implementation 'androidx.lifecycle:lifecycle-livedata:2.0.0-beta01'
+    implementation "androidx.lifecycle:lifecycle-livedata:$lifecycle_version"
     // alternatively - Lifecycles only (no ViewModel or LiveData).
     //     Support library depends on this lightweight import
-    implementation 'androidx.lifecycle:lifecycle-runtime:2.0.0-beta01'
+    implementation "androidx.lifecycle:lifecycle-runtime:$lifecycle_version"
 
-    kapt 'androidx.lifecycle:lifecycle-compiler:2.0.0-beta01'
+    kapt "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
     // alternately - if using Java8, use the following instead of compiler
     //implementation "android.arch.lifecycle:common-java8:$lifecycle_version"
 
     // optional - ReactiveStreams support for LiveData
-    implementation 'androidx.lifecycle:lifecycle-reactivestreams:2.0.0-beta01'
+    implementation "androidx.lifecycle:lifecycle-reactivestreams:$lifecycle_version"
 
     // optional - Test helpers for LiveData
-    testImplementation 'androidx.arch.core:core-testing:2.0.0-beta01'
+    testImplementation "androidx.arch.core:core-testing:$lifecycle_version"
 
-    def room_version = "1.1.1" // or, for latest rc, use "1.1.1-rc1"
+    def room_version = "2.0.0-rc01" // or, for latest rc, use "1.1.1-rc1"
 
-    implementation 'androidx.room:room-runtime:2.0.0-beta01'
-    kapt 'androidx.room:room-compiler:2.0.0-beta01'
+    implementation "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
 
     // optional - RxJava support for Room
-    implementation 'androidx.room:room-rxjava2:2.0.0-beta01'
+    implementation "androidx.room:room-rxjava2:$room_version"
 
     // optional - Guava support for Room, including Optional and ListenableFuture
-    implementation 'androidx.room:room-guava:2.0.0-beta01'
+    implementation "androidx.room:room-guava:$room_version"
 
     // Test helpers
-    testImplementation 'androidx.room:room-testing:2.0.0-beta01'
+    testImplementation "androidx.room:room-testing:$room_version"
 
-    def nav_version = "1.0.0-alpha04"
+    def nav_version = "1.0.0-alpha05"
 
     implementation "android.arch.navigation:navigation-fragment-ktx:$nav_version"
     // use -ktx for Kotlin
