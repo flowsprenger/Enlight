@@ -64,6 +64,10 @@ class AndroidLightService : Service(), IAndroidLightService, ILightsChangeDispat
         return null
     }
 
+    override fun getTileOf(light: Light): TileLight? {
+        return tileService.tileOf(light)
+    }
+
     override fun onLightAdded(light: Light) {
         if (lightsById.containsKey(light.id)) {
             Log.w("AndroidLightService", "light added skipped already known : ${light.id}")
@@ -99,33 +103,38 @@ class AndroidLightService : Service(), IAndroidLightService, ILightsChangeDispat
         listeners.forEach(ILightsChangedDispatcher::groupsLocationChanged)
     }
 
+    private val service = LightService(
+            clientChangeDispatcher = this,
+            transportFactory = UdpTransport,
+            lightFactory = this,
+            ioScheduler = Schedulers.io(),
+            observeScheduler = AndroidSchedulers.mainThread(),
+            extensionFactories = listOf(LocationGroupService, TileService)
+    )
+
+    private val tileService by lazy { service.extensionOf(TileService::class)!! }
+    private val groupLocationService by lazy { service.extensionOf(LocationGroupService::class)!! }
+
     override fun create(id: Long, source: ILightSource<LifxMessage<LifxMessagePayload>>, changeDispatcher: ILightsChangeDispatcher): Light {
-        return lightsById[id] ?: Light(id, source, groupLocationManager)
+        return lightsById[id] ?: Light(id, source, changeDispatcher)
     }
 
     override val locations
-        get() = groupLocationManager.locations
-
-    private val groupLocationManager = LocationGroupManager(this, this)
-    private val service = LightService(
-            transportFactory = UdpTransport,
-            changeDispatcher = groupLocationManager,
-            lightFactory = this,
-            ioScheduler = Schedulers.io(),
-            observeScheduler = AndroidSchedulers.mainThread()
-    )
+        get() = groupLocationService.locations
 
     override fun onBind(intent: Intent?): IBinder {
         startService(intent)
         return binder.also {
             Log.w("AndroidLightService", "service started")
             async {
+                groupLocationService.addListener(this)
+                //tileService.addListener(this)
                 val lightEntities = db.lightDao().getAll()
-                val lights = lightEntities.map { Light(it.id, service, groupLocationManager, it.toDefaultState()) }
+                val lights = lightEntities.map { Light(it.id, service, groupLocationService, it.toDefaultState()) }
                 lightsById = lights.associateBy { it.id }.toMutableMap()
                 mainThread {
                     this.lights = lights
-                    lights.forEach { groupLocationManager.onLightAdded(it) }
+                    lights.forEach { groupLocationService.onLightAdded(it) }
 
                     async {
                         service.start()
@@ -229,6 +238,7 @@ interface IAndroidLightService {
     fun removeChangeListener(listener: ILightsChangedDispatcher): Boolean
     val lights: List<Light>
     fun getLight(id: Long): Light?
+    fun getTileOf(light: Light): TileLight?
     val locations: List<Location>
 
 }

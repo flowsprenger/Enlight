@@ -25,6 +25,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.synthetic.main.include_light_controls.*
 import kotlinx.android.synthetic.main.light_detail_fragment.*
 import lf.wo.enlight.R
 import lf.wo.enlight.kotlin.*
@@ -83,6 +84,12 @@ class LightDetailFragment : Fragment(), IZoneClickedHandler {
             } else {
                 inUpdate = true
 
+                if (light.productInfo.hasTileSupport) {
+                    tileGroup.visibility = View.VISIBLE
+                } else {
+                    tileGroup.visibility = View.GONE
+                }
+
                 if (light.productInfo.hasMultiZoneSupport) {
                     zoneGroup.visibility = View.VISIBLE
                 } else {
@@ -91,6 +98,14 @@ class LightDetailFragment : Fragment(), IZoneClickedHandler {
 
                 if (lightName.text.toString() != light.label) {
                     lightName.setText(light.label)
+                }
+
+                if (locationName.text.toString() != light.location()?.name) {
+                    locationName.setText(light.location()?.name)
+                }
+
+                if (groupName.text.toString() != light.group()?.name) {
+                    groupName.setText(light.group()?.name)
                 }
 
                 if (light.on != powerSwitch.isChecked) {
@@ -227,6 +242,21 @@ class LightDetailFragment : Fragment(), IZoneClickedHandler {
             }
 
         })
+
+        tileColorButton.setOnClickListener {
+            viewModel.light.value?.tile()?.let { tile ->
+                val colors = List(64) { HSBK((it * (Short.MAX_VALUE.toInt() * 2) / 64).toShort(), (Short.MAX_VALUE.toInt() * 2).toShort(), Short.MAX_VALUE, 0) }
+
+                for (index in 0 until tile.chain.size) {
+                    TileSetTileState64Command.create(
+                            tileService = tile.tileService,
+                            light = tile.light,
+                            tileIndex = index,
+                            colors = colors
+                    ).fireAndForget()
+                }
+            }
+        }
     }
 }
 

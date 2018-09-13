@@ -7,105 +7,76 @@
     tools:context=".ui.main.LightDetailFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/zoneGroup"
+        android:id="@+id/multi_device_controls"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:visibility="gone"
-        tools:visibility="visible"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content">
+        app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/ledState"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/zoneGroup"
             android:layout_width="0dp"
-            android:layout_height="32dp"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:itemCount="4"
-            tools:layoutManager="GridLayoutManager"
-            tools:listitem="@layout/zone_list_item"
-            app:layout_constraintRight_toLeftOf="@id/selectionMode"
-            tools:spanCount="5" />
-
-        <ImageView
-            android:id="@+id/selectionMode"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:srcCompat="@drawable/ic_selection_off" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/ledState"
+                android:layout_width="0dp"
+                android:layout_height="32dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@id/selectionMode"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:itemCount="4"
+                tools:layoutManager="GridLayoutManager"
+                tools:listitem="@layout/zone_list_item"
+                tools:spanCount="5" />
+
+            <ImageView
+                android:id="@+id/selectionMode"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_selection_off" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/tileGroup"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible">
+
+            <Button
+                android:id="@+id/tileColorButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tile_color_button_label"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintGuide_percent="0.3"
 
-        android:orientation="vertical" />
-
-    <TextView
-        android:id="@+id/lightNameLabel"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/lightNameLabel"
-        app:layout_constraintBaseline_toBaselineOf="@id/lightName"
+    <include
+        app:layout_constraintTop_toBottomOf="@id/multi_device_controls"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/guideline"
-        tools:text="xxxxx" />
-
-    <EditText
-        android:id="@+id/lightName"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:autofillHints=""
-        android:inputType=""
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@id/zoneGroup"
-        tools:text="Bedroom" />
-
-    <TextView
-        android:id="@+id/powerSwitchLabel"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/powerSwitchLabel"
-        app:layout_constraintBaseline_toBaselineOf="@+id/powerSwitch"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@+id/lightName" />
-
-    <CheckBox
-        android:id="@+id/powerSwitch"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@+id/lightName" />
-
-    <TextView
-        android:id="@+id/brightnessLabel"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/brightnessLabel"
-        app:layout_constraintEnd_toStartOf="@+id/guideline"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/powerSwitch" />
-
-    <SeekBar
-        android:id="@+id/brightnessBar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toRightOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@+id/powerSwitch" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/controls"
+        layout="@layout/include_light_controls" />
 
     <com.jaredrummler.android.colorpicker.ColorPickerView
         android:layout_width="0dp"
@@ -115,7 +86,7 @@
         app:layout_constraintDimensionRatio="H,1:1"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/brightnessBar" />
+        app:layout_constraintTop_toBottomOf="@id/controls" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

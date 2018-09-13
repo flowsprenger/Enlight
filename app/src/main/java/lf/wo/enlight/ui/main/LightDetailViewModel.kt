@@ -14,6 +14,9 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import lf.wo.enlight.lifx.livedata.LightLiveData
+import wo.lf.lifx.api.Light
+import wo.lf.lifx.api.TileLight
+import wo.lf.lifx.api.TileService
 import javax.inject.Inject
 
 class LightDetailViewModel @Inject constructor(application: Application) : AndroidViewModel(application) {
