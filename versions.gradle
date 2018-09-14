@@ -3,15 +3,12 @@ ext.deps = [:]
 def deps = [:]
 
 def versions = [:]
-versions.dagger = "2.16"
+versions.koin = "1.0.0-RC-2"
 
-def dagger = [:]
-dagger.runtime = "com.google.dagger:dagger:$versions.dagger"
-dagger.android = "com.google.dagger:dagger-android:$versions.dagger"
-dagger.android_support = "com.google.dagger:dagger-android-support:$versions.dagger"
-dagger.compiler = "com.google.dagger:dagger-compiler:$versions.dagger"
-dagger.android_support_compiler = "com.google.dagger:dagger-android-processor:$versions.dagger"
+def koin = [:]
+koin.android = "org.koin:koin-android:$versions.koin"
+koin.viewmodel = "org.koin:koin-android-viewmodel:$versions.koin"
 
-deps.dagger = dagger
+deps.koin = koin
 
 ext.deps = deps

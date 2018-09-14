@@ -102,14 +102,9 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
     implementation 'com.jaredrummler:colorpicker:1.0.2'
 
-    implementation deps.dagger.runtime
-    implementation deps.dagger.android
-    implementation deps.dagger.android_support
-
-    kapt deps.dagger.compiler
-    kapt deps.dagger.android_support_compiler
-
     implementation 'com.google.firebase:firebase-crash:16.2.0'
 
+    implementation deps.koin.android
+    implementation deps.koin.viewmodel
 
 }

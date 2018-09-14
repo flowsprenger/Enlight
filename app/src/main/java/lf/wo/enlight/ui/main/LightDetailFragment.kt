@@ -22,13 +22,15 @@ import android.widget.ImageView
 import android.widget.SeekBar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.include_light_controls.*
 import kotlinx.android.synthetic.main.light_detail_fragment.*
 import lf.wo.enlight.R
 import lf.wo.enlight.kotlin.*
+import lf.wo.enlight.viewmodel.LightDetailViewModel
+import lf.wo.enlight.viewmodel.ZoneSelectionMode
+import org.koin.android.viewmodel.ext.android.viewModel
 import wo.lf.lifx.api.*
 import wo.lf.lifx.domain.HSBK
 import wo.lf.lifx.domain.PowerState
@@ -37,10 +39,10 @@ import wo.lf.lifx.extensions.fireAndForget
 
 class LightDetailFragment : Fragment(), IZoneClickedHandler {
     override fun zoneClicked(zone: Int, selected: Boolean) {
-        viewModel.setSelection(zone, selected)
+        lightDetailViewModel.setSelection(zone, selected)
     }
 
-    private lateinit var viewModel: LightDetailViewModel
+    private val lightDetailViewModel: LightDetailViewModel by viewModel()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               syavedInstanceState: Bundle?): View? {
@@ -53,12 +55,11 @@ class LightDetailFragment : Fragment(), IZoneClickedHandler {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(LightDetailViewModel::class.java)
 
         val lightId = LightDetailFragmentArgs.fromBundle(arguments).lightId.toLong()
-        viewModel.initialize(lightId)
+        lightDetailViewModel.initialize(lightId)
 
-        viewModel.settings.observe(this, Observer { settings ->
+        lightDetailViewModel.settings.observe(this, Observer { settings ->
             if (settings == null) {
 
             } else {
@@ -76,7 +77,7 @@ class LightDetailFragment : Fragment(), IZoneClickedHandler {
             }
         })
 
-        viewModel.light.observe(this, Observer<Light> { light: Light? ->
+        lightDetailViewModel.light.observe(this, Observer<Light> { light: Light? ->
             if (light == null) {
 
                 ledState.adapter = null
@@ -116,8 +117,8 @@ class LightDetailFragment : Fragment(), IZoneClickedHandler {
                     brightnessBar.progress = light.color.brightness.toPercent
                 }
 
-                val displayedColor = if (viewModel.settings.value?.selectionMode == ZoneSelectionMode.INDIVIDUAL) {
-                    light.zones.colors[viewModel.settings.value?.selectedZones?.sorted()?.first()
+                val displayedColor = if (lightDetailViewModel.settings.value?.selectionMode == ZoneSelectionMode.INDIVIDUAL) {
+                    light.zones.colors[lightDetailViewModel.settings.value?.selectedZones?.sorted()?.first()
                             ?: 0]
                 } else {
                     light.color
@@ -150,7 +151,7 @@ class LightDetailFragment : Fragment(), IZoneClickedHandler {
     override fun onResume() {
         super.onResume()
         powerSwitch.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.light.value?.let { light ->
+            lightDetailViewModel.light.value?.let { light ->
                 if (light.on != isChecked) {
                     LightSetPowerCommand.create(light, isChecked, 50).fireAndForget()
                 }
@@ -159,11 +160,11 @@ class LightDetailFragment : Fragment(), IZoneClickedHandler {
 
         brightnessBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                viewModel.light.value?.let { light ->
+                lightDetailViewModel.light.value?.let { light ->
                     if (!inUpdate) {
                         val brightness = progress.toUnsignedShort
-                        if (viewModel.settings.value?.selectionMode == ZoneSelectionMode.INDIVIDUAL) {
-                            viewModel.settings.value?.selectedZones?.let {
+                        if (lightDetailViewModel.settings.value?.selectionMode == ZoneSelectionMode.INDIVIDUAL) {
+                            lightDetailViewModel.settings.value?.selectedZones?.let {
                                 it.sorted().fold(listOf<Pair<IntRange, HSBK>>()) { acc, i ->
                                     val last = acc.lastOrNull()
                                     val color = light.zones.colors[i]
@@ -192,14 +193,14 @@ class LightDetailFragment : Fragment(), IZoneClickedHandler {
         })
 
         colorPicker.setOnColorChangedListener { color ->
-            viewModel.light.value?.let { light ->
+            lightDetailViewModel.light.value?.let { light ->
                 if (!inUpdate) {
                     val hsv = floatArrayOf(0f, 0f, 0f)
                     Color.colorToHSV(color, hsv)
                     Log.w("color", "onChanged : $color $hsv")
                     val color = light.color.copy(hue = hsv[0].toDegreeShort, saturation = hsv[1].toUnsignedShort, brightness = hsv[2].toUnsignedShort)
-                    if (viewModel.settings.value?.selectionMode == ZoneSelectionMode.INDIVIDUAL) {
-                        viewModel.settings.value?.selectedZones?.let {
+                    if (lightDetailViewModel.settings.value?.selectionMode == ZoneSelectionMode.INDIVIDUAL) {
+                        lightDetailViewModel.settings.value?.selectedZones?.let {
                             it.sorted().fold(listOf<Pair<IntRange, HSBK>>()) { acc, i ->
                                 val last = acc.lastOrNull()
                                 if (last != null && last.first.last + 1 == i) {
@@ -219,17 +220,17 @@ class LightDetailFragment : Fragment(), IZoneClickedHandler {
         }
 
         selectionMode.setOnClickListener {
-            if (viewModel.settings.value?.selectionMode == ZoneSelectionMode.ALL) {
-                viewModel.setZoneSelectionMode(ZoneSelectionMode.INDIVIDUAL)
+            if (lightDetailViewModel.settings.value?.selectionMode == ZoneSelectionMode.ALL) {
+                lightDetailViewModel.setZoneSelectionMode(ZoneSelectionMode.INDIVIDUAL)
             } else {
-                viewModel.setZoneSelectionMode(ZoneSelectionMode.ALL)
+                lightDetailViewModel.setZoneSelectionMode(ZoneSelectionMode.ALL)
             }
         }
 
         lightName.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 if (!inUpdate) {
-                    viewModel.light.value?.let { light ->
+                    lightDetailViewModel.light.value?.let { light ->
                         DeviceSetLabelCommand.create(light, s.toString()).fireAndForget()
                     }
                 }
@@ -244,7 +245,7 @@ class LightDetailFragment : Fragment(), IZoneClickedHandler {
         })
 
         tileColorButton.setOnClickListener {
-            viewModel.light.value?.tile()?.let { tile ->
+            lightDetailViewModel.light.value?.tile()?.let { tile ->
                 val colors = List(64) { HSBK((it * (Short.MAX_VALUE.toInt() * 2) / 64).toShort(), (Short.MAX_VALUE.toInt() * 2).toShort(), Short.MAX_VALUE, 0) }
 
                 for (index in 0 until tile.chain.size) {
