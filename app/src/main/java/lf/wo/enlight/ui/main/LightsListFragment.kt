@@ -18,30 +18,23 @@ import android.widget.Button
 import android.widget.ImageButton
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.main_fragment.*
 import lf.wo.enlight.R
-import lf.wo.enlight.di.Injectable
 import lf.wo.enlight.kotlin.on
 import lf.wo.enlight.kotlin.toColor
 import lf.wo.enlight.lifx.LightDefaults
+import lf.wo.enlight.viewmodel.LightsViewModel
+import org.koin.android.viewmodel.ext.android.viewModel
 import wo.lf.lifx.api.*
 import wo.lf.lifx.domain.PowerState
 import wo.lf.lifx.extensions.fireAndForget
-import javax.inject.Inject
 
-class LightsListFragment : Fragment(), Injectable {
+class LightsListFragment : Fragment() {
 
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
-
-    private lateinit var viewModel: MainViewModel
-
-    private lateinit var lightsViewModel: LightsViewModel
+    private val lightsViewModel: LightsViewModel by viewModel()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -50,12 +43,6 @@ class LightsListFragment : Fragment(), Injectable {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
-        viewModel = ViewModelProviders.of(this, viewModelFactory)
-                .get(MainViewModel::class.java)
-
-        lightsViewModel = ViewModelProviders.of(activity!!, viewModelFactory)
-                .get(LightsViewModel::class.java)
 
         lightsViewModel.locations.observe(this, Observer<List<Location>> { t ->
             lightsUpdated(t.flatToHierarchy() ?: listOf())

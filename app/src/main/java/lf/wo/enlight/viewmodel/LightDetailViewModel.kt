@@ -8,15 +8,14 @@
 
  */
 
-package lf.wo.enlight.ui.main
+package lf.wo.enlight.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import lf.wo.enlight.lifx.livedata.LightLiveData
-import javax.inject.Inject
 
-class LightDetailViewModel @Inject constructor(application: Application) : AndroidViewModel(application) {
+class LightDetailViewModel constructor(application: Application) : AndroidViewModel(application) {
     val light = LightLiveData(application.applicationContext)
 
     private val mutableSettings = MutableLiveData<LightDetailViewSettings>().apply { value = LightDetailViewSettings(ZoneSelectionMode.ALL, setOf()) }

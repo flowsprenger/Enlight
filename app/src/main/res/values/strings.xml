@@ -4,4 +4,7 @@
     <string name="lightNameLabel">Name:</string>
     <string name="powerSwitchLabel">Power</string>
     <string name="brightnessLabel">brightness</string>
+    <string name="tile_color_button_label">Color</string>
+    <string name="locationNameLabel">Location</string>
+    <string name="groupNameLabel">Group</string>
 </resources>

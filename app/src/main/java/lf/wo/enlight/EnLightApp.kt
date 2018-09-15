@@ -10,22 +10,27 @@
 
 package lf.wo.enlight
 
-import android.app.Activity
 import android.app.Application
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.HasActivityInjector
-import lf.wo.enlight.di.AppInjector
-import javax.inject.Inject
+import lf.wo.enlight.viewmodel.LightDetailViewModel
+import lf.wo.enlight.viewmodel.LightsViewModel
+import org.koin.android.ext.android.startKoin
+import org.koin.android.viewmodel.ext.koin.viewModel
+import org.koin.dsl.module.module
 
-class EnLightApp: Application(), HasActivityInjector {
-
-    @Inject
-    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Activity>
+class EnLightApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        AppInjector.init(this)
+        startKoin(this, listOf(appModule))
     }
 
-    override fun activityInjector() = dispatchingAndroidInjector
+    val appModule = module {
+
+        single<Application> { this@EnLightApp }
+
+        viewModel { LightDetailViewModel(get()) }
+
+        viewModel { LightsViewModel(get()) }
+
+    }
 }
