@@ -15,15 +15,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import lf.wo.enlight.lifx.livedata.LightLiveData
 
-class LightDetailViewModel constructor(application: Application) : AndroidViewModel(application) {
-    val light = LightLiveData(application.applicationContext)
+class LightDetailViewModel constructor(lightId: Long, application: Application) : AndroidViewModel(application) {
+    val light = LightLiveData(lightId, application.applicationContext)
 
     private val mutableSettings = MutableLiveData<LightDetailViewSettings>().apply { value = LightDetailViewSettings(ZoneSelectionMode.ALL, setOf()) }
     val settings = mutableSettings
-
-    fun initialize(lightId: Long) {
-        light.id = lightId
-    }
 
     fun setZoneSelectionMode(mode: ZoneSelectionMode) {
         mutableSettings.value = settings.value?.copy(selectionMode = mode)

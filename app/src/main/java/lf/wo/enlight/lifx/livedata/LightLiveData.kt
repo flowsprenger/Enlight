@@ -17,7 +17,7 @@ import wo.lf.lifx.api.ILightChangeDispatcher
 import wo.lf.lifx.api.Light
 import wo.lf.lifx.api.LightProperty
 
-class LightLiveData(context: Context) : AbstractAndroidLightServiceLiveData<Light>(context), ILightChangeDispatcher {
+class LightLiveData(val id: Long, context: Context) : AbstractAndroidLightServiceLiveData<Light>(context), ILightChangeDispatcher {
 
     inner class AwaitLight : ILightsChangedDispatcher {
         override fun groupsLocationChanged() {
@@ -56,25 +56,15 @@ class LightLiveData(context: Context) : AbstractAndroidLightServiceLiveData<Ligh
     }
 
     override fun bindService(service: IAndroidLightService) {
-        id?.let {
-            val light = service.getLight(it)
-            if (light != null) {
-                bindLight(light)
-                postValue(light)
-            } else {
-                postValue(null)
-                service.addChangeListener(awaitLightListener)
-            }
+        val light = service.getLight(id)
+        if (light != null) {
+            bindLight(light)
+            postValue(light)
+        } else {
+            postValue(null)
+            service.addChangeListener(awaitLightListener)
         }
     }
-
-    var id: Long? = null
-        set(value) {
-            if (bound && id != value) {
-                throw IllegalAccessError("can only set before the livedata is bound")
-            }
-            field = value
-        }
 
     private fun unbindLight(light: Light) {
         light.removeChangeDispatcher(this)

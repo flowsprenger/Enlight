@@ -31,6 +31,7 @@ import lf.wo.enlight.kotlin.*
 import lf.wo.enlight.viewmodel.LightDetailViewModel
 import lf.wo.enlight.viewmodel.ZoneSelectionMode
 import org.koin.android.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import wo.lf.lifx.api.*
 import wo.lf.lifx.domain.HSBK
 import wo.lf.lifx.domain.PowerState
@@ -42,7 +43,7 @@ class LightDetailFragment : Fragment(), IZoneClickedHandler {
         lightDetailViewModel.setSelection(zone, selected)
     }
 
-    private val lightDetailViewModel: LightDetailViewModel by viewModel()
+    private val lightDetailViewModel: LightDetailViewModel by viewModel { parametersOf(LightDetailFragmentArgs.fromBundle(arguments).lightId.toLong()) }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               syavedInstanceState: Bundle?): View? {
@@ -55,9 +56,6 @@ class LightDetailFragment : Fragment(), IZoneClickedHandler {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
-        val lightId = LightDetailFragmentArgs.fromBundle(arguments).lightId.toLong()
-        lightDetailViewModel.initialize(lightId)
 
         lightDetailViewModel.settings.observe(this, Observer { settings ->
             if (settings == null) {

@@ -28,7 +28,7 @@ class EnLightApp : Application() {
 
         single<Application> { this@EnLightApp }
 
-        viewModel { LightDetailViewModel(get()) }
+        viewModel { (id: Long) -> LightDetailViewModel(id, get()) }
 
         viewModel { LightsViewModel(get()) }
 
