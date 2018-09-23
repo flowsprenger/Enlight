@@ -18,6 +18,18 @@
         tools:layout="@layout/light_detail_fragment" >
         <argument
             android:name="lightId"
-            app:argType="string" />
+            app:argType="long" />
+        <action
+            android:id="@+id/action_light_detail_fragment_to_locationGroupFragment"
+            app:destination="@id/location_group_Fragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/location_group_Fragment"
+        android:name="lf.wo.enlight.ui.main.LocationGroupFragment"
+        android:label="fragment_location_group"
+        tools:layout="@layout/fragment_location_group">
+        <argument
+            android:name="lightId"
+            app:argType="long" />
     </fragment>
 </navigation>

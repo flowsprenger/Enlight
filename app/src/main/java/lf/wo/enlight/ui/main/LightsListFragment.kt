@@ -16,6 +16,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
@@ -60,10 +61,19 @@ class LightsListFragment : Fragment() {
                 }
 
                 override fun onClick(light: Light) {
-                    val action = LightsListFragmentDirections.actionMainFragmentToBlankFragment(light.id.toString())
+                    val action = LightsListFragmentDirections.actionMainFragmentToBlankFragment(light.id)
                     view?.findNavController()?.navigate(action)
                 }
             })
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (activity as AppCompatActivity).supportActionBar?.let { actionBar ->
+            actionBar.title = "EnLight"
+            actionBar.setDisplayHomeAsUpEnabled(false)
+            actionBar.setHomeButtonEnabled(false)
         }
     }
 

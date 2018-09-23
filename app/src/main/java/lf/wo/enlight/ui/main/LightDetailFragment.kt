@@ -20,8 +20,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.SeekBar
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.include_light_controls.*
@@ -43,7 +45,7 @@ class LightDetailFragment : Fragment(), IZoneClickedHandler {
         lightDetailViewModel.setSelection(zone, selected)
     }
 
-    private val lightDetailViewModel: LightDetailViewModel by viewModel { parametersOf(LightDetailFragmentArgs.fromBundle(arguments).lightId.toLong()) }
+    private val lightDetailViewModel: LightDetailViewModel by viewModel { parametersOf(LightDetailFragmentArgs.fromBundle(arguments).lightId) }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               syavedInstanceState: Bundle?): View? {
@@ -76,6 +78,8 @@ class LightDetailFragment : Fragment(), IZoneClickedHandler {
         })
 
         lightDetailViewModel.light.observe(this, Observer<Light> { light: Light? ->
+            (activity as AppCompatActivity).supportActionBar?.title = light?.label
+
             if (light == null) {
 
                 ledState.adapter = null
@@ -148,6 +152,13 @@ class LightDetailFragment : Fragment(), IZoneClickedHandler {
 
     override fun onResume() {
         super.onResume()
+
+        (activity as AppCompatActivity).supportActionBar?.let { actionBar ->
+            actionBar.title = lightDetailViewModel.light.value?.label
+            actionBar.setDisplayHomeAsUpEnabled(true)
+            actionBar.setHomeButtonEnabled(true)
+        }
+
         powerSwitch.setOnCheckedChangeListener { _, isChecked ->
             lightDetailViewModel.light.value?.let { light ->
                 if (light.on != isChecked) {
@@ -255,6 +266,11 @@ class LightDetailFragment : Fragment(), IZoneClickedHandler {
                     ).fireAndForget()
                 }
             }
+        }
+
+        locationName.setOnClickListener {
+            val action = LightDetailFragmentDirections.actionLightDetailFragmentToLocationGroupFragment(lightDetailViewModel.id)
+            view?.findNavController()?.navigate(action)
         }
     }
 }

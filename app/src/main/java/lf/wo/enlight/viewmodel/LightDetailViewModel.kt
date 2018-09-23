@@ -15,8 +15,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import lf.wo.enlight.lifx.livedata.LightLiveData
 
-class LightDetailViewModel constructor(lightId: Long, application: Application) : AndroidViewModel(application) {
-    val light = LightLiveData(lightId, application.applicationContext)
+class LightDetailViewModel constructor(val id: Long, application: Application) : AndroidViewModel(application) {
+    val light = LightLiveData(id, application.applicationContext)
 
     private val mutableSettings = MutableLiveData<LightDetailViewSettings>().apply { value = LightDetailViewSettings(ZoneSelectionMode.ALL, setOf()) }
     val settings = mutableSettings
