@@ -12,6 +12,7 @@ package lf.wo.enlight
 
 import android.app.Application
 import lf.wo.enlight.viewmodel.LightDetailViewModel
+import lf.wo.enlight.viewmodel.LightLocationGroupViewModel
 import lf.wo.enlight.viewmodel.LightsViewModel
 import org.koin.android.ext.android.startKoin
 import org.koin.android.viewmodel.ext.koin.viewModel
@@ -28,7 +29,9 @@ class EnLightApp : Application() {
 
         single<Application> { this@EnLightApp }
 
-        viewModel { LightDetailViewModel(get()) }
+        viewModel { (id: Long) -> LightDetailViewModel(id, get()) }
+
+        viewModel { (id: Long) -> LightLocationGroupViewModel(id, get()) }
 
         viewModel { LightsViewModel(get()) }
 
